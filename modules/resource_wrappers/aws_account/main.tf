@@ -1,0 +1,16 @@
+resource "aws_organizations_account" "account" {
+  name  = var.name
+  email = var.email
+
+  close_on_deletion = true
+  role_name = "admin"
+
+  # There is no AWS Organizations API for reading role_name
+  lifecycle {
+    ignore_changes = [role_name]
+  }
+
+  tags = {
+    account_type = var.account_type
+  }
+}
