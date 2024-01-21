@@ -1,5 +1,10 @@
 import argparse
 
+from .constants import (
+    VALID_ACCOUNT_TYPES,
+    VALID_DATA_CLASSIFICATIONS,
+)
+
 
 def _validate_value(value, valid_types):
     if value.lower() not in valid_types:
@@ -10,13 +15,12 @@ def _validate_value(value, valid_types):
 
 
 def _validate_account_type(value):
-    valid_types = ("production", "development", "sandbox")
-    return _validate_value(value, valid_types)
+    return _validate_value(value, VALID_ACCOUNT_TYPES)
 
 
 def _validate_data_classification(value):
     valid_types = ("public", "internal", "confidential")
-    return _validate_value(value, valid_types)
+    return _validate_value(value, VALID_DATA_CLASSIFICATIONS)
 
 
 def _validate_max_length(value):
@@ -27,7 +31,7 @@ def _validate_max_length(value):
 
 def parse_args(args):
     if not args:
-        args.append('-h')
+        args.append('--help')
 
     parser = argparse.ArgumentParser(
         description="Creates an AWS account, writes Terraform and gives import command",
