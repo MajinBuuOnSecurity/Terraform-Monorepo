@@ -2,6 +2,7 @@ import os
 import sys
 
 from .constants import ADMIN_ROLE_NAME
+from .ec2 import delete_all_default_vpcs
 from .organizations import (
     create_and_tag_account,
     get_new_account_name_if_taken,
@@ -71,20 +72,6 @@ def assume_role(new_account_id):
     return credentials
 
 
-def list_regions(credentials):
-    ec2_client = boto3.client(
-        'ec2',
-        region_name='us-east-1',
-        aws_access_key_id=credentials['AccessKeyId'],
-        aws_secret_access_key=credentials['SecretAccessKey'],
-        aws_session_token=credentials['SessionToken'],
-    )
-
-    regions = ec2_client.describe_regions()
-    region_names = [region['RegionName'] for region in regions['Regions']]
-    return region_names
-
-
 def main(command_line_args=sys.argv[1:]):
     args = parse_args(command_line_args)
 
@@ -112,9 +99,7 @@ def main(command_line_args=sys.argv[1:]):
     print(f"Alright, done making account {new_account_id}")
 
     assumed_role_credentials = assume_role(new_account_id)
-    available_regions = list_regions(assumed_role_credentials)
-    print("Available regions after assuming the 'admin' role:")
-    print(available_regions)
+    delete_all_default_vpcs(assumed_role_credentials)
 
     return 0
 
