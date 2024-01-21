@@ -48,7 +48,7 @@ def _get_3_parent_folders():
     current_file_path = os.path.abspath(__file__)
 
     parent_dir = os.path.dirname(current_file_path)
-    # return f'{os.path.sep}'.join(parent_dir.split('/')[-3:])
+    # Cannot use e.g. / in role session name, so we use '.'
     return f'.'.join(parent_dir.split('/')[-3:])
 
 
