@@ -19,6 +19,12 @@ def _validate_data_classification(value):
     return _validate_value(value, valid_types)
 
 
+def _validate_max_length(value):
+    if len(value) < 256:
+        return value
+    raise argparse.ArgumentTypeError(f"Length of '{value}' is too long. Maximum length is 255 characters.")
+
+
 def parse_args(args):
     if not args:
         args.append('-h')
@@ -44,11 +50,13 @@ def parse_args(args):
         "--project",
         help="Specify the Project",
         required=True,
+        type=_validate_max_length,
     )
     parser.add_argument(
         "--description",
         help="Give a one-liner about the account.",
         required=True,
+        type=_validate_max_length,
     )
 
     return parser.parse_args()
