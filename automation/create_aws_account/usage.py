@@ -1,0 +1,54 @@
+import argparse
+
+
+def _validate_value(value, valid_types):
+    if value.lower() not in valid_types:
+        raise argparse.ArgumentTypeError(
+            f"Invalid Account Type. Allowed values are: {', '.join(valid_types)}",
+        )
+    return value.lower()
+
+
+def _validate_account_type(value):
+    valid_types = ("production", "development", "sandbox")
+    return _validate_value(value, valid_types)
+
+
+def _validate_data_classification(value):
+    valid_types = ("public", "internal", "confidential")
+    return _validate_value(value, valid_types)
+
+
+def parse_args(args):
+    if not args:
+        args.append('-h')
+
+    parser = argparse.ArgumentParser(
+        description="Creates an AWS account, writes Terraform and gives import command",
+        prog='create_aws_account',
+    )
+
+    parser.add_argument(
+        "--account_type",
+        help="Specify the Account Type (Production/Development/Sandbox)",
+        required=True,
+        type=_validate_account_type,
+    )
+    parser.add_argument(
+        "--data_classification",
+        help="Specify the Data Classification (Public/Internal/Confidential)",
+        required=True,
+        type=_validate_data_classification,
+    )
+    parser.add_argument(
+        "--project",
+        help="Specify the Project",
+        required=True,
+    )
+    parser.add_argument(
+        "--description",
+        help="Give a one-liner about the account.",
+        required=True,
+    )
+
+    return parser.parse_args()
