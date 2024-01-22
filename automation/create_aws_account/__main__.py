@@ -9,7 +9,6 @@ from .sts import assume_role
 from .usage import parse_args
 
 
-
 def _print_logo():
     print("""
       ,---.  ,--.   ,--. ,---.
