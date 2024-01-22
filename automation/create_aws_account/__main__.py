@@ -8,6 +8,8 @@ from .iam import (
 from .organizations import (
     create_and_tag_account,
     get_new_account_name_if_taken,
+    get_ou_of_account,
+    move_account_to_ou,
 )
 from .sts import assume_role
 from .usage import parse_args
@@ -74,6 +76,17 @@ def main(command_line_args=sys.argv[1:]):
     # delete_all_default_vpcs(assumed_role_credentials)
     add_set_source_identity(assumed_role_credentials)
     replace_administrator_access(assumed_role_credentials)
+
+    current_ou_of_account = get_ou_of_account(new_account_id)
+    if args.desired_ou:
+        if current_ou_of_account == args.desired_ou:
+            print(f"Account already in desired OU.")
+        else:
+            move_account_to_ou(
+                new_account_id,
+                current_ou_of_account=current_ou_of_account,
+                target_ou_id=args.desired_ou,
+            )
 
     return 0
 

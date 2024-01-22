@@ -4,6 +4,7 @@ from .constants import (
     VALID_ACCOUNT_TYPES,
     VALID_DATA_CLASSIFICATIONS,
 )
+from .organizations import get_all_ou_ids
 
 
 def _validate_value(value, valid_types):
@@ -27,6 +28,12 @@ def _validate_max_length(value):
     if len(value) < 256:
         return value
     raise argparse.ArgumentTypeError(f"Length of '{value}' is too long. Maximum length is 255 characters.")
+
+
+def _validate_ou(value):
+    if value in get_all_ou_ids():
+        return value
+    raise argparse.ArgumentTypeError(f"'{value}' is not a valid OU.")
 
 
 def parse_args(args):
@@ -62,5 +69,12 @@ def parse_args(args):
         required=True,
         type=_validate_max_length,
     )
+    parser.add_argument(
+        "--ou",
+        help="Give a valid OU (parent_id) for the account.",
+        type=_validate_ou,
+        dest='desired_ou',
+    )
+
 
     return parser.parse_args()

@@ -1,4 +1,5 @@
 import time
+from functools import lru_cache
 
 from .constants import (
     ADMIN_ROLE_NAME,
@@ -7,6 +8,7 @@ from .constants import (
 )
 
 import boto3
+import botocore.exceptions
 
 
 def create_and_tag_account(
@@ -103,3 +105,82 @@ def get_new_account_name_if_taken(proposed_account_name):
         new_account_name = f"{proposed_account_name}-{counter}"
 
     return new_account_name
+
+
+def get_ou_of_account(account_id):
+    org_client = boto3.client('organizations')
+
+    for ou_id in get_all_ou_ids():
+        accounts_in_ou = org_client.list_accounts_for_parent(
+            ParentId=ou_id,
+        )['Accounts']
+        if any(
+            account['Id'] == account_id
+            for account in accounts_in_ou
+        ):
+            return ou_id
+
+    raise ValueError(f"No OU for account_id {account_id}")
+
+
+@lru_cache(maxsize=None)
+def get_all_ou_ids(parent_id=None):
+    """
+    Response of list_roots() looks like:
+        {
+            "Roots": [
+                {
+                    "Id": "r-examplerootid111",
+    """
+    org_client = boto3.client('organizations')
+
+    parent_id_is_root = False
+    if not parent_id:
+        org_roots = org_client.list_roots()["Roots"]
+        assert len(org_roots) == 1
+        parent_id = org_roots[0]["Id"]
+        parent_id_is_root = True
+
+    try:
+        response = org_client.list_organizational_units_for_parent(ParentId=parent_id)
+    except botocore.exceptions.ClientError:
+        raise
+
+    ou_ids = [
+        ou['Id']
+        for ou in response['OrganizationalUnits']
+    ]
+
+    # Recursively get OU IDs for nested OUs
+    for ou_id in ou_ids:
+        ou_ids.extend(get_all_ou_ids(parent_id=ou_id))
+
+    # Add root ID to the OU IDs
+    if parent_id_is_root:
+        ou_ids.append(parent_id)
+
+    return ou_ids
+
+
+def move_account_to_ou(account_id, current_ou_of_account, target_ou_id):
+    org_client = boto3.client('organizations')
+
+    try:
+        org_client.move_account(
+            AccountId=account_id,
+            DestinationParentId=target_ou_id,
+            SourceParentId=current_ou_of_account,
+        )
+        print(f"Account {account_id} moved to OU {target_ou_id}")
+    except org_client.exceptions.AccountNotFoundException:
+        print(f"Account {account_id} not found.")
+        raise
+    except org_client.exceptions.SourceParentNotFoundException:
+        print(f"Source parent OU not found.")
+        raise
+    except org_client.exceptions.DestinationParentNotFoundException:
+        print(f"Destination parent OU not found.")
+        raise
+    except Exception as e:
+        print(f"Error: {e}")
+        raise
