@@ -12,6 +12,10 @@ from .organizations import (
     move_account_to_ou,
 )
 from .sts import assume_role
+from .terraform import (
+    write_terraform,
+    display_import_instructions,
+)
 from .usage import parse_args
 
 
@@ -53,10 +57,10 @@ def main(command_line_args=sys.argv[1:]):
 
     proposed_account_name = f"{args.project}-{args.account_type}"
     account_name_to_make = get_new_account_name_if_taken(proposed_account_name)
-    if proposed_account_name != account_name_to_make:
-        if not _prompt_continue(f"{proposed_account_name} already exists, create {account_name_to_make} instead?"):
-            print("Exiting.")
-            return 0
+    # if proposed_account_name != account_name_to_make:
+    #     if not _prompt_continue(f"{proposed_account_name} already exists, create {account_name_to_make} instead?"):
+    #         print("Exiting.")
+    #         return 0
 
     print(f"Okie dokie, making the account {account_name_to_make}")
     tags = {
@@ -87,6 +91,9 @@ def main(command_line_args=sys.argv[1:]):
                 current_ou_of_account=current_ou_of_account,
                 target_ou_id=args.desired_ou,
             )
+
+    write_terraform(account_name_to_make, tags, args.desired_ou)
+    # display_instructions(new_account_id)
 
     return 0
 
