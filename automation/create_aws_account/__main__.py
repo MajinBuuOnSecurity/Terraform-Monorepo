@@ -1,16 +1,13 @@
-import os
 import sys
 
-from .constants import ADMIN_ROLE_NAME
 from .ec2 import delete_all_default_vpcs
 from .organizations import (
     create_and_tag_account,
     get_new_account_name_if_taken,
 )
+from .sts import assume_role
 from .usage import parse_args
 
-import boto3
-from botocore.exceptions import ClientError
 
 
 def _print_logo():
@@ -42,34 +39,6 @@ def _prompt_continue(prompt):
             return False
         else:
             print("Invalid input. Please enter 'y' or 'n'.")
-
-
-def _get_3_parent_folders():
-    # Returns e.g. Terraform-Monorepo/automation/create_aws_account
-    current_file_path = os.path.abspath(__file__)
-
-    parent_dir = os.path.dirname(current_file_path)
-    # Cannot use e.g. / in role session name, so we use '.'
-    return f'.'.join(parent_dir.split('/')[-3:])
-
-
-def assume_role(new_account_id):
-    sts_client = boto3.client('sts')
-    role_arn = f'arn:aws:iam::{new_account_id}:role/{ADMIN_ROLE_NAME}'
-    current_user = os.getlogin()
-
-    role_session_name = f"{current_user}@{_get_3_parent_folders()}"
-    assert len(role_session_name) <= 64
-
-    # print(f"mah role name is: {role_session_name}")
-
-    response = sts_client.assume_role(
-        RoleArn=role_arn,
-        RoleSessionName=role_session_name,
-    )
-
-    credentials = response['Credentials']
-    return credentials
 
 
 def main(command_line_args=sys.argv[1:]):

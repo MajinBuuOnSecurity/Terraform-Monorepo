@@ -63,10 +63,10 @@ def delete_all_default_vpcs(credentials):
     """
     futures = []
     THREADPOOL_MAX_WORKERS = 20
-    regions = _get_available_regions(credentials)
+    sorted_regions = sorted(_get_available_regions(credentials))
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=THREADPOOL_MAX_WORKERS) as executor:
-        for region in regions:
+        for region in sorted_regions:
             region_specific_ec2_client = boto3.client(
                 "ec2",
                 region_name=region,
