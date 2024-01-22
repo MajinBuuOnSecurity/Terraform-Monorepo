@@ -67,8 +67,6 @@ def create_account_tags(
     except botocore.exceptions.ClientError:
         raise
 
-    print(f"so response is {response}")
-
 
 def _get_aws_account_names():
     org_client = boto3.client('organizations')

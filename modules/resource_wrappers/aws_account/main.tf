@@ -12,5 +12,8 @@ resource "aws_organizations_account" "account" {
 
   tags = {
     account_type = var.account_type
+    data_classification = var.data_classification
+    description = var.description
+    project = var.project
   }
 }

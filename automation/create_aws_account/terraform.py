@@ -1,5 +1,4 @@
 import os
-# import os.path
 
 from .constants import (
     EMAIL_LIST_DOMAIN,
@@ -69,5 +68,7 @@ def write_terraform(account_name_to_make, tags, desired_ou):
 	    file.write(content_to_write)
 
 
-def display_import_instructions(account_id):
-	pass
+def display_import_instructions(account_name_to_make, account_id):
+	tf_module_name = account_name_to_make.replace('-', '_')
+	instructions = f"terraform import module.{tf_module_name} {account_id}"
+	print(f"Run `{instructions}`")

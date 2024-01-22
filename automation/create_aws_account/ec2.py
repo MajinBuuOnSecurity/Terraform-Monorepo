@@ -1,6 +1,8 @@
 import concurrent.futures
+import time
 
 import boto3
+import botocore.exceptions
 
 
 def _get_available_regions(credentials):
@@ -12,7 +14,13 @@ def _get_available_regions(credentials):
         aws_session_token=credentials['SessionToken'],
     )
 
-    regions = ec2_client.describe_regions()
+    try:
+        regions = ec2_client.describe_regions()
+    except botocore.exceptions.ClientError:
+        print(f"Trouble describing regions, sleeping.")
+        time.sleep(10)
+        return _get_available_regions(credentials)
+
     region_names = [region['RegionName'] for region in regions['Regions']]
     return region_names
 

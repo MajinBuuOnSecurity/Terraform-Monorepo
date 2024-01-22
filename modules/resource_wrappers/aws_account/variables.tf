@@ -4,8 +4,8 @@ variable "name" {
   description = "Name of account"
 
   validation {
-    condition     = can(regex("^([A-Z][a-z]+\\s?)+$", var.name))
-    error_message = "Regex ^([A-Z][a-z]+\\s?)+$ failed for var.name."
+    condition     = can(regex("^([-a-z0-9]+\\s?)+$", var.name))
+    error_message = "Regex ^([-a-z0-9]+\\s?)+$ failed for var.name."
   }
 }
 
@@ -31,7 +31,30 @@ variable "account_type" {
   description = "Type of account"
 
   validation {
-    condition = contains(["Test", "Development", "Production"], var.account_type)
-    error_message = "Valid values for the account_type variable are Test, Development and Production"
+    condition = contains(["test", "development", "production"], var.account_type)
+    error_message = "Valid values for the account_type variable are test, development and production"
   }
+}
+
+variable "data_classification" {
+  type        = string
+  nullable    = false
+  description = "Data Classification (Public/Internal/Confidential)"
+
+  validation {
+    condition = contains(["public", "internal", "confidential"], var.data_classification)
+    error_message = "Valid values for the data_classification variable are public, internal and confidential"
+  }
+}
+
+variable "description" {
+  type        = string
+  nullable    = false
+  description = "Description of account"
+}
+
+variable "project" {
+  type        = string
+  nullable    = false
+  description = "Project of account"
 }

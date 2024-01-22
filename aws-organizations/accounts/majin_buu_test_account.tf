@@ -1,11 +1,14 @@
-module "majin_buu_test_account" {
-  source = "../../modules/resource_wrappers/aws_account"
+# module "majin_buu_test_account" {
+#   source = "../../modules/resource_wrappers/aws_account"
 
-  name = "Majin Buu Test Account"
-  email = "majinbuuonsec+majin_test_account@gmail.com"
+#   name = "majin buu test account"
+#   email = "majinbuuonsec+majin_test_account@gmail.com"
 
-  account_type = "Test"
-}
+#   account_type = "test"
+#   data_classification = "public"
+#   project = "hey"
+#   description = "Shit"
+# }
 
 # WTF
 

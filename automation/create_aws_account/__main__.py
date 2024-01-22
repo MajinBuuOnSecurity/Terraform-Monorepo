@@ -57,10 +57,10 @@ def main(command_line_args=sys.argv[1:]):
 
     proposed_account_name = f"{args.project}-{args.account_type}"
     account_name_to_make = get_new_account_name_if_taken(proposed_account_name)
-    # if proposed_account_name != account_name_to_make:
-    #     if not _prompt_continue(f"{proposed_account_name} already exists, create {account_name_to_make} instead?"):
-    #         print("Exiting.")
-    #         return 0
+    if proposed_account_name != account_name_to_make:
+        if not _prompt_continue(f"{proposed_account_name} already exists, create {account_name_to_make} instead?"):
+            print("Exiting.")
+            return 0
 
     print(f"Okie dokie, making the account {account_name_to_make}")
     tags = {
@@ -69,15 +69,15 @@ def main(command_line_args=sys.argv[1:]):
         "project": args.project,
         "description": args.description,
     }
-    # new_account_id = create_and_tag_account(
-    #     account_name_to_make,
-    #     tags,
-    # )
-    new_account_id = "891377159200"
+    new_account_id = create_and_tag_account(
+        account_name_to_make,
+        tags,
+    )
+    # new_account_id = "891377159200"
     print(f"Alright, done making account {new_account_id}")
 
     assumed_role_credentials = assume_role(new_account_id)
-    # delete_all_default_vpcs(assumed_role_credentials)
+    delete_all_default_vpcs(assumed_role_credentials)
     add_set_source_identity(assumed_role_credentials)
     replace_administrator_access(assumed_role_credentials)
 
@@ -93,7 +93,7 @@ def main(command_line_args=sys.argv[1:]):
             )
 
     write_terraform(account_name_to_make, tags, args.desired_ou)
-    # display_instructions(new_account_id)
+    display_import_instructions(account_name_to_make, new_account_id)
 
     return 0
 
