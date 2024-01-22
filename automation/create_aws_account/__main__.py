@@ -1,6 +1,7 @@
 import sys
 
 from .ec2 import delete_all_default_vpcs
+from .iam import add_set_source_identity
 from .organizations import (
     create_and_tag_account,
     get_new_account_name_if_taken,
@@ -67,7 +68,8 @@ def main(command_line_args=sys.argv[1:]):
     print(f"Alright, done making account {new_account_id}")
 
     assumed_role_credentials = assume_role(new_account_id)
-    delete_all_default_vpcs(assumed_role_credentials)
+    # delete_all_default_vpcs(assumed_role_credentials)
+    add_set_source_identity(assumed_role_credentials)
 
     return 0
 

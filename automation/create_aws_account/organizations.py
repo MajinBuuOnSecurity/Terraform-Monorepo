@@ -1,12 +1,12 @@
 import time
 
-import boto3
-
 from .constants import (
     ADMIN_ROLE_NAME,
     EMAIL_LIST_DOMAIN,
     EMAIL_LIST_PREFIX,
 )
+
+import boto3
 
 
 def create_and_tag_account(
