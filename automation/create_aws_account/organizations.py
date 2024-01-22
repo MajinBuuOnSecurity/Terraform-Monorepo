@@ -62,7 +62,7 @@ def create_account_tags(
             ResourceId=account_id,
             Tags=formatted_tags,
         )
-    except ClientError:
+    except botocore.exceptions.ClientError:
         raise
 
     print(f"so response is {response}")
@@ -73,7 +73,7 @@ def _get_aws_account_names():
 
     try:
         response = org_client.list_accounts()
-    except ClientError:
+    except botocore.exceptions.ClientError:
         raise
 
     accounts = response['Accounts']
