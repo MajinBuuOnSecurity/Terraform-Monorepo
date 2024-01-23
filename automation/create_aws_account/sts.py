@@ -22,8 +22,6 @@ def assume_role(new_account_id):
     role_session_name = f"{current_user}@{_get_3_parent_folders()}"
     assert len(role_session_name) <= 64
 
-    # print(f"mah role name is: {role_session_name}")
-
     response = sts_client.assume_role(
         RoleArn=role_arn,
         RoleSessionName=role_session_name,

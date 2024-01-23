@@ -62,7 +62,7 @@ def main(command_line_args=sys.argv[1:]):
             print("Exiting.")
             return 0
 
-    print(f"Okie dokie, making the account {account_name_to_make}")
+    print(f"Making the account {account_name_to_make}")
     tags = {
         "account_type": args.account_type,
         "data_classification": args.data_classification,
@@ -73,7 +73,7 @@ def main(command_line_args=sys.argv[1:]):
         account_name_to_make,
         tags,
     )
-    print(f"Alright, done making account {new_account_id}")
+    print(f"Done making account {new_account_id}")
 
     assumed_role_credentials = assume_role(new_account_id)
     enable_ebs_encryption_and_delete_all_default_vpcs(assumed_role_credentials)
