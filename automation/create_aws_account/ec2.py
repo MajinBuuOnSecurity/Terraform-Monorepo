@@ -17,7 +17,7 @@ def _get_available_regions(credentials):
     try:
         regions = ec2_client.describe_regions()
     except botocore.exceptions.ClientError:
-        print(f"Trouble describing regions, sleeping.")
+        print(f"Trouble describing regions, sleeping for 10 seconds, will re-try.")
         time.sleep(10)
         return _get_available_regions(credentials)
 
@@ -54,6 +54,14 @@ def delete_default_vpc(region, ec2_resource, ec2_client, default_vpc_id):
     ec2_client.delete_vpc(VpcId=default_vpc_id)
 
 
+def enable_ebs_encryption(region, ec2_client):
+    status = ec2_client.get_ebs_encryption_by_default()
+    if status["EbsEncryptionByDefault"] == True:
+        print(f"[In {region}] EbsEncryptionByDefault already activated, nothing to do")
+    else:
+        print(f"[In {region}] Activation of EbsEncryptionByDefault in progress")
+        ec2_client.enable_ebs_encryption_by_default()
+
 
 def find_default_vpc(ec2_client):
     vpc_response = ec2_client.describe_vpcs()
@@ -63,9 +71,9 @@ def find_default_vpc(ec2_client):
     return None
 
 
-def delete_all_default_vpcs(credentials):
+def enable_ebs_encryption_and_delete_all_default_vpcs(credentials):
     """
-    Inspired by:
+    VPC part is inspired by:
     - https://github.com/davidobrien1985/delete-aws-default-vpc/blob/master/delete-default-vpc.py
     - https://github.com/awslabs/aws-deployment-framework/blob/bcc100e215912fa3dbc2f64e3a9bb161d92f822f/src/lambda_codebase/account_processing/delete_default_vpc.py
     """
@@ -90,11 +98,21 @@ def delete_all_default_vpcs(credentials):
                 aws_session_token=credentials['SessionToken'],
             )
 
+            # EBS Encryption
+            futures.append(
+                executor.submit(
+                    enable_ebs_encryption,
+                    region,
+                    region_specific_ec2_client,
+                )
+            )
+
             default_vpc_id = find_default_vpc(region_specific_ec2_client)
             if not default_vpc_id:
                 print(f"[In {region}] No default VPC")
                 continue
 
+            # Delete in there is a default VPC
             futures.append(
                 executor.submit(
                     delete_default_vpc,
@@ -106,4 +124,4 @@ def delete_all_default_vpcs(credentials):
             )
 
     concurrent.futures.wait(futures)
-    print('Deleted all default VPCs')
+    print('Deleted all default VPCs and enabled EBS encryption by default in all regions')

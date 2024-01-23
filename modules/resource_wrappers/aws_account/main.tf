@@ -10,6 +10,9 @@ resource "aws_organizations_account" "account" {
     ignore_changes = [role_name]
   }
 
+  parent_id = var.parent_id
+
+  # Required tags
   tags = {
     account_type = var.account_type
     data_classification = var.data_classification

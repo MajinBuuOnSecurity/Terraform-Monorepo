@@ -58,3 +58,9 @@ variable "project" {
   nullable    = false
   description = "Project of account"
 }
+
+variable "parent_id" {
+  type        = string
+  default     = null
+  description = "(Optional) ID of parent OU"
+}
