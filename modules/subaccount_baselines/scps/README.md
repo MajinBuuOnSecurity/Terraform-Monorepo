@@ -6,3 +6,5 @@ Primary examples include:
 - Service and region specific allowlist SCPs, if desired.
 
 You could argue it is desirable to be able to disable SCPs be at the account level. In the case that a particular SCP needs to be temporarily disabled.
+
+**Note this assumes GuardDuty and CloudTrail are enabled at the organization-level**
