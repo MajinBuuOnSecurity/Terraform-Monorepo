@@ -2,8 +2,7 @@ locals {
   possible_scps = [
     # DenyLeaveOrg
     {
-      include = true,
-      # include = var.deny_leave_organization,
+      include = var.deny_leave_organization,
       effect = "Deny"
       actions = ["organizations:LeaveOrganization"]
       resources = ["*"]
@@ -11,8 +10,7 @@ locals {
     },
     # DenyEc2PublicAMI
     {
-      include = true,
-      # include = var.deny_public_ami,
+      include = var.deny_public_ami_ec2,
       effect = "Deny"
       actions = ["ec2:RunInstances"]
       resources = ["arn:aws:ec2:*::image/*"]

@@ -3,6 +3,11 @@ variable "deny_internet_gateways_ec2" {
   default = true
 }
 
+variable "deny_public_ami_ec2" {
+  type    = bool
+  default = true
+}
+
 # deny_imds_v1_and_max_hop
 # Deny CloudFormation?
 # Deny Comprehend?
