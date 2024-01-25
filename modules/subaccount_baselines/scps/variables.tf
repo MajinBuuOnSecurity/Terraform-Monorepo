@@ -4,8 +4,8 @@ variable "account_id" {
   description = "ID of account"
 
   validation {
-    condition     = can(regex("^([0-9]+\\s?)+$", var.account_id))
-    error_message = "Regex ^([0-9]+\\s?)+$ failed for var.account_id."
+    condition     = can(tonumber(var.account_id))
+    error_message = "tonumber failed for var.account_id."
   }
 }
 
