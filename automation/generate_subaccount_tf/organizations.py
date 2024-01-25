@@ -22,3 +22,19 @@ def get_aws_account_names():
     # existing_account_names.add("hey-production-2")
 
     return existing_account_names
+
+
+def get_aws_account_id(account_name):
+    org_client = boto3.client('organizations')
+
+    try:
+        response = org_client.list_accounts()
+    except botocore.exceptions.ClientError:
+        raise
+
+    accounts = response['Accounts']
+    for account in accounts:
+        if account_name == account['Name']:
+            print(f"account is {account}")
+            return account['Id']
+    raise ValueError("Account dont exist")

@@ -1,3 +1,22 @@
+variable "account_id" {
+  type        = string
+  nullable    = false
+  description = "ID of account"
+
+  validation {
+    condition     = can(regex("^([0-9]+\\s?)+$", var.account_id))
+    error_message = "Regex ^([0-9]+\\s?)+$ failed for var.account_id."
+  }
+}
+
+
+
+
+
+#
+# SCP Bools
+#
+
 variable "deny_internet_gateways_ec2" {
   type    = bool
   default = true

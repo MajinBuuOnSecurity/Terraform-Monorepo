@@ -56,3 +56,8 @@ resource "aws_organizations_policy" "account_1" {
   name = "account_1"
   content = jsonencode(jsondecode(data.aws_iam_policy_document.account_1.json))
 }
+
+resource "aws_organizations_policy_attachment" "account" {
+  policy_id = aws_organizations_policy.account_1.id
+  target_id = var.account_id
+}
