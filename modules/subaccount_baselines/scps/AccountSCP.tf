@@ -54,6 +54,8 @@ data "aws_iam_policy_document" "account_1" {
 
 resource "aws_organizations_policy" "account_1" {
   name = "account_1"
+  # Not sure if needed
+  # JSON messiness due to https://ramimac.me/terraform-minimized-scps
   content = jsonencode(jsondecode(data.aws_iam_policy_document.account_1.json))
 }
 
