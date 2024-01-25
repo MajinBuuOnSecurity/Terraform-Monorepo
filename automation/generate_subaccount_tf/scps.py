@@ -14,7 +14,7 @@ VERSIONS_TEMPLATE = '''terraform {{
 
   backend "s3" {{
     bucket         = "{state_bucket}"
-    key            = "{account_name}.tfstate"
+    key            = "{account_name}_scps.tfstate"
     region         = "{state_region}"
     dynamodb_table = "{state_table}"
   }}
@@ -49,6 +49,9 @@ def generate_scp_baseline(subaccount_directory):
         account_name_var=account_name_var,
         account_id=get_aws_account_id(account_name),
     )
+    # TODO: Programmatically get latest TF version
+    # TODO: Programmatically get latest AWS provider version
+    # TODO: Pass in bucket/region/table as an argument
     versions_tf_content = VERSIONS_TEMPLATE.format(
         tf_version='1.5',
         state_bucket='majin-buu-tfstate',
