@@ -78,7 +78,7 @@ def main(command_line_args=sys.argv[1:]):
     assumed_role_credentials = assume_role(new_account_id)
     enable_ebs_encryption_and_delete_all_default_vpcs(assumed_role_credentials)
     add_set_source_identity(assumed_role_credentials)
-    replace_administrator_access(assumed_role_credentials)
+    replace_administrator_access(assumed_role_credentials, new_account_id)
 
     current_ou_of_account = get_ou_of_account(new_account_id)
     if args.desired_ou:

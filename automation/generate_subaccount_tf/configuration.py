@@ -35,6 +35,9 @@ provider "aws" {{
     role_arn    = "arn:aws:iam::{account_id}:role/admin"
   }}
 }}
+
+# Print account ID in the Terraform output
+data "aws_caller_identity" "current" {{}}
 '''
 
 

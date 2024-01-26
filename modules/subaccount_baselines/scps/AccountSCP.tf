@@ -1,3 +1,4 @@
+# TODO: Add e.g. `NotAction` support
 locals {
   possible_scps = [
     # DenyLeaveOrg

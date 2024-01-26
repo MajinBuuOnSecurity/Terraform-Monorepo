@@ -18,3 +18,6 @@ provider "aws" {
     role_arn    = "arn:aws:iam::211125546669:role/admin"
   }
 }
+
+# Print whoami in the Terraform output
+data "aws_caller_identity" "current" {}

@@ -36,6 +36,39 @@ NEW_POLICY = f'''{{
   ],
   "Version": "2012-10-17"
 }}'''
+S3_ACCOUNT_PUBLIC_BLOCK_POLICY_NAME = 'EnableS3AccountPublicAccessBlock'
+S3_ACCOUNT_PUBLIC_BLOCK_DOCUMENT = '''{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "EnableS3AccountPublicAccessBlock",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutAccountPublicAccessBlock"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}'''
+
+
+def create_s3_account_public_block_policy(iam_client, new_account_id):
+    try:
+        response = iam_client.create_policy(
+            PolicyName=S3_ACCOUNT_PUBLIC_BLOCK_POLICY_NAME,
+            PolicyDocument=S3_ACCOUNT_PUBLIC_BLOCK_DOCUMENT,
+        )
+    except iam_client.exceptions.EntityAlreadyExistsException:
+        # if 'EntityAlreadyExistsException' in str(e):
+        return f"arn:aws:iam::{new_account_id}:policy/EnableS3AccountPublicAccessBlock"
+        # raise
+    except botocore.exceptions.ClientError as e:
+        print("Error: {}".format(str(e)))
+        raise
+
+    return response['Policy']['Arn']
 
 
 def add_set_source_identity(credentials):
@@ -75,7 +108,7 @@ def add_set_source_identity(credentials):
         raise
 
 
-def replace_administrator_access(credentials):
+def replace_administrator_access(credentials, new_account_id):
     iam_client = boto3.client(
         'iam',
         aws_access_key_id=credentials['AccessKeyId'],
@@ -91,6 +124,7 @@ def replace_administrator_access(credentials):
     current_policy_arns = sorted(
         policy['PolicyArn']
         for policy in response['AttachedPolicies']
+        if S3_ACCOUNT_PUBLIC_BLOCK_POLICY_NAME not in policy['PolicyArn']
     )
     # Give `admin` "iam:*" and various read-only policies
     desired_policy_arns = [
@@ -101,7 +135,7 @@ def replace_administrator_access(credentials):
     ]
 
     if current_policy_arns == desired_policy_arns:
-        print(f"{ADMIN_ROLE_NAME} already has desired policy attachments")
+        print(f"{ADMIN_ROLE_NAME} already has desired managed policy attachments")
         return
 
     for policy_arn in desired_policy_arns:
@@ -113,13 +147,33 @@ def replace_administrator_access(credentials):
         except botocore.exceptions.ClientError as e:
             print(f"Error attaching {policy_arn} to {ADMIN_ROLE_NAME}: {e}")
 
-    try:
-        response = iam_client.detach_role_policy(
-            RoleName=ADMIN_ROLE_NAME,
-            PolicyArn='arn:aws:iam::aws:policy/AdministratorAccess',
-        )
-    except botocore.exceptions.ClientError as e:
-        raise
+    public_access_block_permissions_attached = any(
+        S3_ACCOUNT_PUBLIC_BLOCK_POLICY_NAME in policy['PolicyArn']
+        for policy in response['AttachedPolicies']
+    )
+    if not public_access_block_permissions_attached:
+        arn = create_s3_account_public_block_policy(iam_client, new_account_id)
+        try:
+            iam_client.attach_role_policy(
+                RoleName=ADMIN_ROLE_NAME,
+                PolicyArn=arn,
+            )
+        except botocore.exceptions.ClientError as e:
+            print("Error: {}".format(str(e)))
+            raise
 
-    print("All policies added. AdministratorAccess removed.")
+    administrator_access_attached = any(
+        policy['PolicyArn'] == 'arn:aws:iam::aws:policy/AdministratorAccess'
+        for policy in response['AttachedPolicies']
+    )
+    if administrator_access_attached:
+        try:
+            response = iam_client.detach_role_policy(
+                RoleName=ADMIN_ROLE_NAME,
+                PolicyArn='arn:aws:iam::aws:policy/AdministratorAccess',
+            )
+        except botocore.exceptions.ClientError as e:
+            raise
+
+    print("All policies added. And AdministratorAccess removed.")
 
