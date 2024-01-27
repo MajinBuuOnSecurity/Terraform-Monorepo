@@ -4,7 +4,7 @@ I wrote this code in a quick and dirty way, just to send it to a few companies t
 
 You should be able to understand this code within a day or two, and not have account creation be much more complicated to make than say, S3 bucket creation.
 
-If you look at e.g. [AWS Control Tower Account Factory for Terraform](https://docs.aws.amazon.com/controltower/latest/userguide/aft-architecture.html) I am sure you will not be able to understand it all within a day or two, nor it easily to your heart's content.
+If you look at e.g. [AWS Control Tower Account Factory for Terraform](https://docs.aws.amazon.com/controltower/latest/userguide/aft-architecture.html) I am sure you will not be able to understand it all within a day or two, nor customize it easily to your heart's content.
 
 
 ### Automation
