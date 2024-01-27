@@ -2,17 +2,17 @@
 
 I wrote this code in a quick and dirty way, just to send it to a few companies that were trying to decide between the age old `AWS Control Tower v.s. Landing Zone v.s. Terraform vs. Other` debate.
 
-You should be able to understand this code within a day or two, and not have accounts be any more complicated to make than say, an S3 bucket.
+You should be able to understand this code within a day or two, and not have account creation be much more complicated to make than say, S3 bucket creation.
 
-If you look at e.g. [AWS Control Tower Account Factory for Terraform](https://docs.aws.amazon.com/controltower/latest/userguide/aft-architecture.html) I am sure you will not be able to understand it all within a day or two, nor customize it easily to your heart's content.
+If you look at e.g. [AWS Control Tower Account Factory for Terraform](https://docs.aws.amazon.com/controltower/latest/userguide/aft-architecture.html) I am sure you will not be able to understand it all within a day or two, nor it easily to your heart's content.
 
 
 ### Automation
 
 #### create_aws_account
 
-At a high-level:
-1. [Create an account](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/main/automation/create_aws_account/__main__.py#L65)
+There are [more details below](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo#create-account), but at a high-level:
+1. Creates an account
 1. Writes Terraform file under [`aws-organizations/accounts/`](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/tree/main/aws-organizations/accounts)
 1. Outputs the `terraform import` command needed to [import](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/organizations_account#import) the generated Terraform file.
 
@@ -44,6 +44,8 @@ This creates 2 folders with Terraform in them.
 One is an SCP baseline, which will be applied in the context of your management account.
 The other is a configuration baseline, which will be applied in the context of the subaccount.
 
+See [`subaccounts/smoky-production`](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/tree/main/subaccounts/smoky-production) as an example.
+
 ```
 python -m generate_subaccount_tf --help 
 usage: generate_subaccount_tf [-h] [--only-scp-baseline] [--only-configuration-baseline]
@@ -60,10 +62,6 @@ options:
                         Give a valid account name.
 ```
 
-### Modules
-### Subaccounts/
-
-
 ### Detailed Explaination
 
 #### Create Account
@@ -79,12 +77,27 @@ This does the following:
 7. Moves new account to the given OU, if given.
 8. Writes Terraform / displays `import` instructions
 
-All this code is straightforwardly read from [__main__.py](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/main/automation/create_aws_account/__main__.py) which is only 100 lines of code.
+All this code is straightforwardly read from [\_\_main\_\_.py](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/main/automation/create_aws_account/__main__.py) which is only 100 lines of code.
 
 Note: We need to change `ADMIN_NAME` in [constants.py](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/main/automation/create_aws_account/constants.py#L1) if you do not want `admin` to be the [name of the role made upon account creation](https://docs.aws.amazon.com/organizations/latest/APIReference/API_CreateAccount.html#API_CreateAccount_RequestParameters). (This defaults to `OrganizationAccountAccessRole`, a mouthful, if left unspecified.)
 
 #### Generate Account Terraform
 
+##### SCP Baseline
+
+The `scps` baseline module will, turn on a bunch of account-specific SCPs by default (the [variables to the file are a bunch of bool values](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/main/modules/subaccount_baselines/scps/variables.tf))
+
+Any SCP inheritance can be leveraged separately, by specifying a `parent_id` argument to the `aws_account` module ([example](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/77258df72ad91cb92f0ddafc54eff1685dcef0fc/aws-organizations/accounts/smoky_production.tf#L11)).
+
+##### Configuration Baseline
+
+The `configuration` baseline module will just setup IAM roles and also turn on [`aws_s3_account_public_access_block`](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/main/modules/subaccount_baselines/configuration/s3/main.tf)
+
+The only `import` necessary, is that of the `admin` IAM role. As it is automatically made upon account creation and we have to use it to [get into the account in the first place](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/77258df72ad91cb92f0ddafc54eff1685dcef0fc/subaccounts/smoky-production/configuration_baseline/versions.tf#L18).
+
+Note: This assumes you setup GuardDuty and CloudTrail at the org-level, such that you do not need to re-do it for each individual account.
+
+(I could have made it so you also need to import the e.g. 4 policy attachments of `IAMFullAccess`/`ReadOnlyAccess`/`SecurityAudit`/`ViewOnlyAccess`/`EnableS3AccountPublicAccessBlock` mentioned above, but since it is the `admin` role this felt unnecessary.)
 
 ### FAQ
 
@@ -102,7 +115,22 @@ We could
 1. Give `admin` permission to turn it on upon account creation, Terraform the setting via `aws_s3_account_public_access_block`.
 
 I chose option 3, as it seemed the least bad.
-As with EBS encrpytion, an SCP blocking ` "s3:PutAccountPublicAccessBlock"` will be applied prior to a customer getting access.
+As with EBS encryption, an SCP blocking `"s3:PutAccountPublicAccessBlock"` will be applied prior to a customer getting access.
 
 
+## Future Improvments
 
+I wrote this code in a sloppy way just to demonstrate the idea, not use it in production. (Though I have written very similar code in a production setting, and this approach worked well.)
+
+- Change the email list value to be configurable [rather than hard-coded](https://github.com/search?q=repo%3AMajinBuuOnSecurity%2FTerraform-Monorepo%20majinbuuonsec&type=code)
+- Add tests
+- Add more SCPs to `scp_baseline`
+- Terraform a `baseline_ou` that can be used in addition to the `scp_baseline` module, in the case that we run into the [`Maximum attached per account`](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_reference_limits.html) (5) limit.
+- Add better IAM policies for `admin` and `operator`, such as service-specific IAM policies that take advantage of condition keys.
+- Handling the case wherein you enable a new region at the org-level that all subaccounts can use (We would want to e.g. delete the default VPC, enable EBS encryption, in newly enabled regions.)
+
+This lays the ground work for automatically setting up:
+- Networking
+- AWS Config
+- SSM
+and many other things, upon account creation.
