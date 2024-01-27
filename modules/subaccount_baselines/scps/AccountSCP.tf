@@ -9,6 +9,17 @@ locals {
       resources = ["*"]
       conditions = []
     },
+    # DenyChangingBaseline
+    {
+      include = var.deny_changing_baseline,
+      effect = "Deny"
+      actions = [
+        "ec2:DisableEbsEncryptionByDefault",
+        "s3:PutAccountPublicAccessBlock",
+      ]
+      resources = ["*"]
+      conditions = []
+    },
     # DenyEc2PublicAMI
     {
       include = var.deny_public_ami_ec2,
