@@ -61,9 +61,7 @@ def create_s3_account_public_block_policy(iam_client, new_account_id):
             PolicyDocument=S3_ACCOUNT_PUBLIC_BLOCK_DOCUMENT,
         )
     except iam_client.exceptions.EntityAlreadyExistsException:
-        # if 'EntityAlreadyExistsException' in str(e):
         return f"arn:aws:iam::{new_account_id}:policy/EnableS3AccountPublicAccessBlock"
-        # raise
     except botocore.exceptions.ClientError as e:
         print("Error: {}".format(str(e)))
         raise

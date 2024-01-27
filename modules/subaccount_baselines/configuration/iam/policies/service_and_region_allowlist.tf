@@ -1,6 +1,6 @@
 # This dumbass MVP is just gonna give service:* for every service
 #
-# I _would_ add a service-specific IAM policy with lots of conditional keys etc.
+# I _would_ add a service-specific IAM policy with lots of condition keys etc.
 # In a non-MVP versions
 data "aws_iam_policy_document" "allowlists" {
   statement {

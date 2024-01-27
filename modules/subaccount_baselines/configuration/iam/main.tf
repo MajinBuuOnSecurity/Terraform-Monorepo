@@ -10,7 +10,6 @@ module "roles" {
 
 resource "aws_iam_policy_attachment" "admin-allowlists" {
   name       = "admin-allowlists-attachment"
-  # TODO: Maybe just output the .name or role and .arn of policy?
-  roles      = [module.roles.admin_role.name]
-  policy_arn = module.policies.allowlists_policy.arn
+  roles      = [module.roles.admin_role_name]
+  policy_arn = module.policies.allowlists_policy_arn
 }

@@ -1,29 +1,6 @@
-# IAM Role
-# ./Policies maybe?
-
-# {
-#     "Version": "2012-10-17",
-#     "Statement": [
-#         {
-#             "Effect": "Allow",
-#             "Principal": {
-#                 "AWS": ""
-#             },
-#             "Action": [
-#                 "sts:AssumeRole",
-#                 "sts:SetSourceIdentity"
-#             ]
-#         }
-#     ]
-# }
-
-
-
-# IAMFullAccess AWS managed 1
-# ReadOnlyAccess  AWS managed - job function  1
-# SecurityAudit AWS managed - job function  1
-# ViewOnlyAccess  AWS managed - job function  1
-
+# TODO: Fill this out
+# The intention is it is like admin but less powerful
+# E.g. no IAM edit permissions
 resource "aws_iam_role" "operator" {
   name               = "operator"
   assume_role_policy = data.aws_iam_policy_document.human_assume_role_policy.json
