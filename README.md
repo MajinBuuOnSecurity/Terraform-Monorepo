@@ -124,7 +124,7 @@ I wrote this code in a sloppy way just to demonstrate the idea, not use it in pr
 
 - Change the email list value to be configurable [rather than hard-coded](https://github.com/search?q=repo%3AMajinBuuOnSecurity%2FTerraform-Monorepo%20majinbuuonsec&type=code)
 - Add tests
-- Add more SCPs to `scp_baseline`
+- Add more SCPs to `scp_baseline` (https://github.com/ScaleSec/terraform_aws_scp/tree/main/security_controls_scp/modules can be mined for SCPs.)
 - Terraform a `baseline_ou` that can be used in addition to the `scp_baseline` module, in the case that we run into the [`Maximum attached per account`](https://docs.aws.amazon.com/organizations/latest/userguide/orgs_reference_limits.html) (5) limit.
 - Add better IAM policies for `admin` and `operator`, such as service-specific IAM policies that take advantage of condition keys.
 - Handling the case wherein you enable a new region at the org-level that all subaccounts can use (We would want to e.g. delete the default VPC, enable EBS encryption, in newly enabled regions.)
