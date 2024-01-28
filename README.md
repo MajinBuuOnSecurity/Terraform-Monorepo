@@ -1,8 +1,8 @@
 ## Motivation
 
-I wrote this code in a quick and dirty way, just to send it to a few companies that were trying to decide between the age old `AWS Control Tower v.s. Landing Zone v.s. Terraform vs. Other` debate.
+I wrote this code in a quick and dirty way, just to send it to a few companies that were trying to decide between the age-old `AWS Control Tower v.s. Landing Zone v.s. Terraform vs. Other` debate.
 
-You should be able to understand this code within a day or two, and not have account creation be much more complicated to make than say, S3 bucket creation.
+You should be able to understand this code within a day or two, and not have account creation be much more complicated than say, S3 bucket creation.
 
 If you look at e.g. [AWS Control Tower Account Factory for Terraform](https://docs.aws.amazon.com/controltower/latest/userguide/aft-architecture.html) I am sure you will not be able to understand it all within a day or two, nor customize it easily to your heart's content.
 
@@ -39,7 +39,7 @@ options:
 
 #### generate_subaccount_tf
 
-This creates 2 folders with Terraform in them.
+This creates 2 folders with generated Terraform in them that each call a respective module.
 
 One is an SCP baseline, which will be applied in the context of your management account.
 The other is a configuration baseline, which will be applied in the context of the subaccount.
@@ -74,7 +74,7 @@ This does the following:
 4. Edits the `admin` role trust policy to include the [`sts:SetSourceIdentity`](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_control-access_monitor.html#id_credentials_temp_control-access_monitor-know) permission
 5. Adds the managed `IAMFullAccess`, `ReadOnlyAccess`, `SecurityAudit`, `ViewOnlyAccess` policies, and a custom `EnableS3AccountPublicAccessBlock` policy, to `admin` role
 6. Remove `AdministratorAccess` (`* on *`) from `admin` role
-7. Moves new account to the given OU, if given.
+7. Moves new account to the given OU, if one was given.
 8. Writes Terraform / displays `import` instructions
 
 All this code is straightforwardly read from [\_\_main\_\_.py](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/main/automation/create_aws_account/__main__.py) which is only 100 lines of code.
@@ -85,13 +85,13 @@ Note: We need to change `ADMIN_NAME` in [constants.py](https://github.com/MajinB
 
 ##### SCP Baseline
 
-The `scps` baseline module will, turn on a bunch of account-specific SCPs by default (the [variables to the file are a bunch of bool values](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/main/modules/subaccount_baselines/scps/variables.tf))
+The `scps` baseline module will turn on a bunch of account-specific SCPs by default (the [variables.tf of the module are a bunch of bool values](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/main/modules/subaccount_baselines/scps/variables.tf))
 
 Any SCP inheritance can be leveraged separately, by specifying a `parent_id` argument to the `aws_account` module ([example](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/77258df72ad91cb92f0ddafc54eff1685dcef0fc/aws-organizations/accounts/smoky_production.tf#L11)).
 
 ##### Configuration Baseline
 
-The `configuration` baseline module will just setup IAM roles and also turn on [`aws_s3_account_public_access_block`](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/main/modules/subaccount_baselines/configuration/s3/main.tf)
+The `configuration` baseline module will just setup IAM roles and turn on [`aws_s3_account_public_access_block`](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/main/modules/subaccount_baselines/configuration/s3/main.tf)
 
 The only `import` necessary, is that of the `admin` IAM role. As it is automatically made upon account creation and we have to use it to [get into the account in the first place](https://github.com/MajinBuuOnSecurity/Terraform-Monorepo/blob/77258df72ad91cb92f0ddafc54eff1685dcef0fc/subaccounts/smoky-production/configuration_baseline/versions.tf#L18).
 
@@ -133,5 +133,6 @@ This lays the ground work for automatically setting up:
 - Networking
 - AWS Config
 - SSM
+- Permissions for e.g. your security team, Terraform CI/CD pipeline etc.
 
 and many other things, upon account creation.
