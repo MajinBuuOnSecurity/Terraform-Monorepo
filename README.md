@@ -1,6 +1,6 @@
 ## Motivation
 
-I wrote this code in a quick and dirty way, just to send it to a few companies that were trying to decide between the age-old `AWS Control Tower v.s. Landing Zone v.s. Terraform vs. Other` debate.
+I wrote this code in a quick and dirty way, just to send it to a few companies that were trying to decide between the age-old `AWS Control Tower` v.s. `Landing Zone` v.s. [AWS Deployment Framework](https://github.com/awslabs/aws-deployment-framework/blob/bcc100e215912fa3dbc2f64e3a9bb161d92f822f/src/lambda_codebase/account_processing/create_account.py#L24) vs. `Terraform` vs. `Other` debate.
 
 You should be able to understand this code within a day or two, and not have account creation be much more complicated than say, S3 bucket creation.
 
